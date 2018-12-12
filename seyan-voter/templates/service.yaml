@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.votebackend.metadataName }}
+  labels:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    helm.sh/chart: {{ include "seyan-voter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: {{ .Values.votebackend.metadataName }}
+spec:
+  type: {{ .Values.votebackend.service.type }}
+  ports:
+    - port: {{ .Values.votebackend.service.port }}
+  selector:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ .Values.votebackend.metadataName }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.votefrontend.metadataName }}
+  labels:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    helm.sh/chart: {{ include "seyan-voter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: {{ .Values.votefrontend.metadataName }}
+spec:
+  type: {{ .Values.votefrontend.service.type }}
+  ports:
+    - port: {{ .Values.votefrontend.service.port }}
+  selector:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ .Values.votefrontend.metadataName }}

@@ -1,0 +1,90 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ .Values.votebackend.metadataName }}
+  labels:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    helm.sh/chart: {{ include "seyan-voter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.votebackend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ .Values.votebackend.metadataName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app: {{ .Values.votebackend.metadataName }}
+    spec:
+      containers:
+        - name: {{ .Values.votebackend.metadataName }}
+          image: "{{ .Values.votebackend.image.repository }}:{{ .Values.votebackend.image.tag }}"
+          imagePullPolicy: {{ .Values.votebackend.image.pullPolicy }}
+          resources:
+{{ toYaml .Values.votebackend.resources | indent 12 }}
+    {{- with .Values.votebackend.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.votebackend.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.votebackend.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ .Values.votefrontend.metadataName }}
+  labels:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    helm.sh/chart: {{ include "seyan-voter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.votefrontend.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app: {{ .Values.votefrontend.metadataName }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app: {{ .Values.votefrontend.metadataName }}
+    spec:
+      containers:
+        - name: {{ .Values.votefrontend.metadataName }}
+          image: "{{ .Values.votefrontend.image.repository }}:{{ .Values.votefrontend.image.tag }}"
+          imagePullPolicy: {{ .Values.votefrontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          env:
+          - name: REDIS
+            value: "{{ .Values.votebackend.metadataName }}"
+          resources:
+{{ toYaml .Values.votefrontend.resources | indent 12 }}
+    {{- with .Values.votefrontend.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.votefrontend.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.votefrontend.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

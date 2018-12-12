@@ -1,0 +1,39 @@
+{{- if .Values.votefrontend.ingress.enabled -}}
+{{- $fullName := include "seyan-voter.fullname" . -}}
+{{- $ingressPath := .Values.votefrontend.ingress.path -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+    app.kubernetes.io/name: {{ include "seyan-voter.name" . }}
+    helm.sh/chart: {{ include "seyan-voter.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app: {{ .Values.votefrontend.metadataName }}
+{{- with .Values.votefrontend.ingress.annotations }}
+  annotations:
+{{ toYaml . | indent 4 }}
+{{- end }}
+spec:
+{{- if .Values.votefrontend.ingress.tls }}
+  tls:
+  {{- range .Values.votefrontend.ingress.tls }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      secretName: {{ .secretName }}
+  {{- end }}
+{{- end }}
+  rules:
+  {{- range .Values.votefrontend.ingress.hosts }}
+    - host: {{ . | quote }}
+      http:
+        paths:
+          - path: {{ $ingressPath }}
+            backend:
+              serviceName: {{ $fullName }}
+              servicePort: http
+  {{- end }}
+{{- end }}
